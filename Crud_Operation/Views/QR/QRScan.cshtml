@@ -1,0 +1,63 @@
+﻿<!-- Button to trigger modal -->
+<button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#qrScannerModal">
+    <i class="bi bi-qr-code"></i> Scan QR
+</button>
+
+<!-- QR Code Scanner Modal -->
+<div class="modal fade" id="qrScannerModal" tabindex="-1" aria-labelledby="qrScannerModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="qrScannerModalLabel">Scan QR Code</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div id="qr-reader" style="width:100%"></div>
+                <div id="qr-reader-results"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        var qrReader;
+        var resultContainer = document.getElementById('qr-reader-results');
+
+        $('#qrScannerModal').on('shown.bs.modal', function () {
+            qrReader = new Html5Qrcode("qr-reader");
+            qrReader.start(
+                { facingMode: "environment" }, // Using environment-facing camera
+                {
+                    fps: 10,
+                    qrbox: 250
+                },
+                qrCodeMessage => {
+                    resultContainer.innerHTML = `<div class="alert alert-success">QR Code: ${qrCodeMessage}</div>`;
+                    qrReader.stop().then(() => {
+                        $('#qrScannerModal').modal('hide');
+                    }).catch(err => {
+                        console.error(err);
+                    });
+                },
+                errorMessage => {
+                    // Handle errors
+                    console.warn(errorMessage);
+                }
+            ).catch(err => {
+                console.error(err);
+            });
+        });
+
+        $('#qrScannerModal').on('hidden.bs.modal', function () {
+            if (qrReader) {
+                qrReader.stop().catch(err => console.error(err));
+            }
+            resultContainer.innerHTML = '';
+        });
+    });
+</script>

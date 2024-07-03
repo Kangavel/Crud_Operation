@@ -1,0 +1,273 @@
+﻿
+@model IPagedList<Crud_Operation.Models.Student>
+@using X.PagedList
+@using X.PagedList.Mvc.Core
+
+<div style="float:right;display:flex; margin-right: 10px;margin-bottom:16px" >
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addStudentModal">
+        <i class="bi bi-plus-circle-fill"></i> Add Students
+    </button>
+</div>
+<div>
+     <input type="text" id="searchInput" class="form-control mb-3" placeholder="Search by name or email" onkeyup="filterTable()">
+
+</div>
+
+
+
+<table class="table" id="studentsTable">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th style="text-align:center">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var student in Model)
+        {
+            <tr>
+                <td>@student.Name</td>
+                <td>@student.Email</td>
+                <td>@student.Phone</td>
+                <td style="text-align:center">
+                    <a href="javascript:void(0);" class="edit-link"
+                       data-id="@student.Id"
+                       data-name="@student.Name"
+                       data-email="@student.Email"
+                       data-phone="@student.Phone"
+                       data-subscribed="@student.Subscribed"
+                       onclick="openEditModal(this)"><i class="bi bi-pencil-square" id="Edit"> Edit</i></a>
+
+                    <i class="bi bi-trash" style="margin-left:30px;color:red" id="Delete"  onclick="deleteStudent('@student.Id')"> Delete</i>
+
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+<!-- Edit Student Modal -->
+<div class="modal fade" id="editStudentModal" tabindex="-1" aria-labelledby="editStudentModalLabel" aria-hidden="true">
+    <div class="modal-dialog" >
+        <div class="modal-content" id="model1">
+            <div class="modal-header" id="model2">
+                <h5 class="modal-title" id="editStudentModalLabel">Edit Student Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" id="editForm" action="/Student/Edit">
+                    <input type="hidden" id="studentId" name="Id" />
+                    <div class="mt-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" id="studentName" name="Name" />
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" id="studentEmail" name="Email" />
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label">Phone</label>
+                        <input type="text" class="form-control" id="studentPhone" name="Phone" />
+                    </div>
+                    <div class="mt-3" style="margin-left:20px">
+                        <input type="checkbox" class="form-check-input" id="studentSubscribed" name="Subscribed" />
+                        <label class="form-check-label" for="studentSubscribed">Subscribed</label>
+                    </div>
+                    <div class="mt-3">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Student Modal -->
+<div class="modal fade" id="addStudentModal" tabindex="-1" aria-labelledby="addStudentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content" id="model1">
+            <div class="modal-header" id="model2">
+                <h5 class="modal-title" id="addStudentModalLabel">Student Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="/Student/Add">
+                    <div class="mt-3">
+                        <label class="form-label">Name</label>
+                        <input type="text" class="form-control" name="Name" />
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="Email" />
+                    </div>
+                    <div class="mt-3">
+                        <label class="form-label">Phone</label>
+                        <input type="text" class="form-control" name="Phone" />
+                    </div>
+                    <div class="mt-3" style="margin-left:20px">
+                        <input type="checkbox" class="form-check-input" id="subscribed" name="Subscribed" />
+                        <label class="form-check-label" for="subscribed">Subscribed</label>
+                    </div>
+                    <div class="mt-3" style="display:flex;align-items:center;justify-content:center">
+                        <button type="submit" class="btn btn-primary" style="width:100%">Submit</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="d-flex justify-content-center" >
+    @Html.PagedListPager(Model, page => Url.Action("List", new { page }), new PagedListRenderOptions
+{
+    
+    DisplayLinkToPreviousPage = PagedListDisplayMode.Always,
+    DisplayLinkToNextPage = PagedListDisplayMode.Always,
+    DisplayLinkToFirstPage = PagedListDisplayMode.Never,
+    DisplayLinkToLastPage = PagedListDisplayMode.Never,
+    Display = PagedListDisplayMode.Always,
+    MaximumPageNumbersToDisplay = 5,
+    LinkToPreviousPageFormat = "« Prev",
+    LinkToNextPageFormat = "Next »",
+    LinkToIndividualPageFormat = "{0}",
+    ClassToApplyToFirstListItemInPager = "page-item",
+    ClassToApplyToLastListItemInPager = "page-item",
+    ContainerDivClasses = new[] { "pagination-container" },
+    UlElementClasses = new[] { "pagination" },
+    LiElementClasses = new[] { "page-item" },
+    PageClasses = new[] { "page-link" },
+    ActiveLiElementClass = "active"
+})
+</div>
+
+<div class="modal fade" id="confirmDeleteModal" tabindex="-1" role="dialog" aria-labelledby="confirmDeleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header" >
+                <h5 style="margin-left:33%" class="modal-title" id="confirmDeleteModalLabel">Confirm Delete</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" style="color:red" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body" style="color:red">
+                Are you sure you want to delete this student?
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script>
+
+
+    function filterTable() {
+        var input, filter, table, tr, tdName, tdEmail, i, txtValueName, txtValueEmail;
+        input = document.getElementById("searchInput");
+        filter = input.value.toLowerCase();
+        table = document.getElementById("studentsTable");
+        tr = table.getElementsByTagName("tr");
+
+        for (i = 1; i < tr.length; i++) { // start from 1 to skip the table header
+            tr[i].style.display = "none";
+            tdName = tr[i].getElementsByTagName("td")[0];
+            tdEmail = tr[i].getElementsByTagName("td")[1];
+            if (tdName && tdEmail) { // Check if both tdName and tdEmail are found
+                txtValueName = tdName.textContent || tdName.innerText;
+                txtValueEmail = tdEmail.textContent || tdEmail.innerText;
+                if (txtValueName.toLowerCase().indexOf(filter) > -1 || txtValueEmail.toLowerCase().indexOf(filter) > -1) {
+                    tr[i].style.display = ""; // Show the row if the filter matches
+                }
+            }
+        }
+    }
+
+    // Function to fetch all table rows (including those not visible due to pagination)
+    function getAllTableRows() {
+        var table = document.getElementById("studentsTable");
+        return table.getElementsByTagName("tr");
+    }
+    
+     toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": false,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        };
+
+    function openEditModal(element) {
+        var id = element.getAttribute('data-id');
+        var name = element.getAttribute('data-name');
+        var email = element.getAttribute('data-email');
+        var phone = element.getAttribute('data-phone');
+        var subscribed = element.getAttribute('data-subscribed') === 'true';
+
+        document.getElementById('studentId').value = id;
+        document.getElementById('studentName').value = name;
+        document.getElementById('studentEmail').value = email;
+        document.getElementById('studentPhone').value = phone;
+        document.getElementById('studentSubscribed').checked = subscribed;
+
+        var modal = new bootstrap.Modal(document.getElementById('editStudentModal'));
+        modal.show();
+    }
+
+    function deleteStudent(id) {
+        // Show the modal
+        $('#confirmDeleteModal').modal('show');
+
+        // Handle delete confirmation
+        $('#confirmDeleteBtn').click(function () {
+            var form = document.createElement('form');
+            form.method = 'post';
+            form.action = '/Student/Delete/' + id;
+            document.body.appendChild(form);
+            form.submit();
+
+            // Close the modal after form submission
+            $('#confirmDeleteModal').modal('hide');
+        });
+    }
+    document.getElementById('editForm').addEventListener('submit', function (event) {
+        var name = document.getElementById('studentName').value;
+        var email = document.getElementById('studentEmail').value;
+        var phone = document.getElementById('studentPhone').value;
+
+        if (!name || !email || !phone) {
+            event.preventDefault(); // Prevent form submission
+            toastr.error('Please fill in all required fields');
+        }
+    });
+
+    document.querySelector('form[action="/Student/Add"]').addEventListener('submit', function (event) {
+        var name = this.querySelector('input[name="Name"]').value;
+        var email = this.querySelector('input[name="Email"]').value;
+        var phone = this.querySelector('input[name="Phone"]').value;
+
+        if (!name || !email || !phone) {
+            event.preventDefault(); // Prevent form submission
+            toastr.error('Please fill in all required fields');
+        }
+    });
+</script>
+
+
